@@ -12,7 +12,7 @@ GameObject:
   - component: {fileID: 7426030086148480084}
   - component: {fileID: 4677683435793197214}
   - component: {fileID: 1500433280516036081}
-  - component: {fileID: 1810541831698080993}
+  - component: {fileID: 4009283002203913742}
   m_Layer: 0
   m_Name: Bridge
   m_TagString: Untagged
@@ -28,13 +28,13 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 6623251600007825739}
   serializedVersion: 2
-  m_LocalRotation: {x: 0, y: 0.7071068, z: 0, w: 0.7071068}
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 0.2, y: 0.2, z: 0.2}
   m_ConstrainProportionsScale: 1
   m_Children: []
   m_Father: {fileID: 0}
-  m_LocalEulerAnglesHint: {x: 0, y: 90, z: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!33 &7426030086148480084
 MeshFilter:
   m_ObjectHideFlags: 0
@@ -114,7 +114,7 @@ Rigidbody:
   m_Interpolate: 0
   m_Constraints: 0
   m_CollisionDetection: 0
---- !u!65 &1810541831698080993
+--- !u!65 &4009283002203913742
 BoxCollider:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -133,5 +133,5 @@ BoxCollider:
   m_ProvidesContacts: 0
   m_Enabled: 1
   serializedVersion: 3
-  m_Size: {x: 16.3536, y: 0.42, z: 2.284741}
-  m_Center: {x: -7.948866, y: 0.22, z: 0.00033867368}
+  m_Size: {x: 16.64, y: 0.9, z: 2.2847404}
+  m_Center: {x: -7.948864, y: -0.5, z: 0.0003386736}
