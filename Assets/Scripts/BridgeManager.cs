@@ -20,7 +20,7 @@ public class BridgeManager : MonoBehaviour
     private Vector3 bridgeStartPosition; // Vị trí bắt đầu của cầu
     private bool isGrowing = true; // Trạng thái tăng hoặc giảm scale
     private readonly Vector3 minScale = new Vector3(0.1f, 0.1f, 0.1f); // Scale tối thiểu
-    private readonly Vector3 maxScale = new Vector3(0.2f, 0.2f, 0.2f); // Scale tối đa
+    private readonly Vector3 maxScale = new Vector3(0.3f, 0.3f, 0.3f); // Scale tối đa
     private List<GameObject> activeTraps = new List<GameObject>(); // Danh sách để theo dõi các trap đang active
 
     #region 
@@ -86,9 +86,7 @@ public class BridgeManager : MonoBehaviour
         Rigidbody rb = currentBridge.GetComponent<Rigidbody>();
         if (rb != null)
         {
-            rb.isKinematic = true;
-            rb.velocity = Vector3.zero;
-            rb.angularVelocity = Vector3.zero;
+            rb.isKinematic = true; // Chỉ cần đặt isKinematic, không cần đặt velocity
         }
         else
         {
@@ -179,7 +177,7 @@ public class BridgeManager : MonoBehaviour
             // Tính vị trí ngẫu nhiên trong BoxCollider, chỉ ngẫu nhiên X
             Vector3 localPos = new Vector3(
                 Random.Range(-0.5f, 0.5f) * bridgeCollider.size.x, // Ngẫu nhiên X
-                isSpikeTrap ? 0.1f : 5f, // 0.1Y cho gai, 5Y cho búa
+                isSpikeTrap ? 0.2f : 5f, // 0.1Y cho gai, 5Y cho búa
                 0f // Z giữ ở trung tâm
             );
             Vector3 spawnPosition = bridgeCollider.transform.TransformPoint(bridgeCollider.center + localPos);

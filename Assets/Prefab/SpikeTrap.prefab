@@ -11,7 +11,7 @@ GameObject:
   - component: {fileID: 2721201589660122224}
   - component: {fileID: 2201614883409396023}
   - component: {fileID: 6457233526242565137}
-  m_Layer: 0
+  m_Layer: 7
   m_Name: Props_2a
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -96,7 +96,7 @@ GameObject:
   - component: {fileID: 5647417476128889415}
   - component: {fileID: 9174758272246217488}
   - component: {fileID: 1319915433596571005}
-  m_Layer: 0
+  m_Layer: 7
   m_Name: SpikeTrap
   m_TagString: SpikeTrap
   m_Icon: {fileID: 0}

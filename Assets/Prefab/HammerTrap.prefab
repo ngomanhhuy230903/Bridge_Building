@@ -13,7 +13,7 @@ GameObject:
   - component: {fileID: 7588811584691855301}
   - component: {fileID: 5264056379751752279}
   - component: {fileID: 9126068543128812460}
-  m_Layer: 0
+  m_Layer: 7
   m_Name: HammerTrap
   m_TagString: HammerTrap
   m_Icon: {fileID: 0}
