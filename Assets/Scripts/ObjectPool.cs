@@ -79,8 +79,6 @@ public class ObjectPool : MonoBehaviour
         if (rb != null)
         {
             rb.isKinematic = true; // Đặt lại kinematic
-            rb.velocity = Vector3.zero; // Reset vận tốc
-            rb.angularVelocity = Vector3.zero; // Reset xoay
         }
         reusedObj.transform.position = position;
         reusedObj.transform.rotation = rotation;

@@ -4,21 +4,21 @@ public class PlayerController : MonoBehaviour
 {
     private Rigidbody rb;
     private Animator animator;
-    [SerializeField] float moveSpeed = 3f; // Tốc độ di chuyển cơ bản
-    [SerializeField] float turnSpeed = 100f; // Tốc độ xoay
-    [SerializeField] float jumpForce = 5f; // Lực nhảy
-    [SerializeField] float jumpCooldown = 1f; // Thời gian chờ giữa các lần nhảy
-    [SerializeField] float spikeSlowFactor = 0.5f; // Hệ số giảm tốc khi chạm bẫy gai
-    [SerializeField] float hammerKnockbackForce = 5f; // Lực đẩy lùi khi chạm búa
-    [SerializeField] float speedBoostFactor = 2f; // Hệ số tăng tốc khi thu thập PowerUp
-    [SerializeField] float powerUpDuration = 5f; // Thời gian hiệu lực của PowerUp
+    [SerializeField] float moveSpeed = 3f;
+    [SerializeField] float turnSpeed = 100f;
+    [SerializeField] float jumpForce = 5f;
+    [SerializeField] float jumpCooldown = 1f;
+    [SerializeField] float spikeSlowFactor = 0.5f;
+    [SerializeField] float hammerKnockbackForce = 5f;
+    [SerializeField] float speedBoostFactor = 2f;
+    [SerializeField] float powerUpDuration = 5f;
 
     private bool isMoving = false;
     private bool isJumping = false;
     private float lastJumpTime;
     private float originalMoveSpeed;
-    private bool isInvincible = false; // Trạng thái bất tử
-    private float powerUpEndTime; // Thời gian kết thúc PowerUp
+    private bool isInvincible = false;
+    private float powerUpEndTime;
 
     void Start()
     {
@@ -26,10 +26,17 @@ public class PlayerController : MonoBehaviour
         animator = GetComponent<Animator>();
         lastJumpTime = -jumpCooldown;
         originalMoveSpeed = moveSpeed;
+
+        rb.velocity = Vector3.zero;
+        rb.angularVelocity = Vector3.zero;
+        rb.isKinematic = false;
+        Debug.Log("PlayerController Start | Rigidbody Kinematic: " + rb.isKinematic + " | Velocity: " + rb.velocity);
     }
 
     void Update()
     {
+        if (GameManager.Instance != null && GameManager.Instance.IsGamePaused()) return;
+
         float moveInput = Input.GetAxisRaw("Vertical");
         float turnInput = Input.GetAxisRaw("Horizontal");
 
@@ -65,6 +72,7 @@ public class PlayerController : MonoBehaviour
     {
         Vector3 moveDirection = transform.forward * input * moveSpeed * Time.deltaTime;
         rb.MovePosition(rb.position + moveDirection);
+        Debug.Log("MoveCharacter | Direction: " + moveDirection + " | New Position: " + rb.position);
     }
 
     private void TurnCharacter(float input)
@@ -85,10 +93,9 @@ public class PlayerController : MonoBehaviour
 
     private void UpdateAnimation()
     {
-        // Kiểm tra tốc độ để chuyển sang "Run"
-        bool isRunning = moveSpeed >= 3f && isMoving; // Chỉ chạy khi di chuyển và tốc độ > 4
-        animator.SetBool("IsWalking", isMoving && !isRunning); // Walk chỉ khi không Run
-        animator.SetBool("IsRunning", isRunning); // Run khi tốc độ > 4
+        bool isRunning = moveSpeed >= 3f && isMoving;
+        animator.SetBool("IsWalking", isMoving && !isRunning);
+        animator.SetBool("IsRunning", isRunning);
 
         if (isJumping && rb.velocity.y <= 0 && Physics.Raycast(transform.position, Vector3.down, 0.1f))
         {
@@ -108,6 +115,7 @@ public class PlayerController : MonoBehaviour
                 moveSpeed = originalMoveSpeed * spikeSlowFactor;
                 Invoke("ResetSpeed", 2f);
                 animator.SetTrigger("Damage");
+                GameManager.Instance.DecreaseHP(); // Trừ HP
                 Debug.Log("Hit Spike Trap, speed reduced to: " + moveSpeed + " | Trigger 'Damage' set");
             }
             else if (collision.gameObject.CompareTag("HammerTrap"))
@@ -116,6 +124,7 @@ public class PlayerController : MonoBehaviour
                 knockbackDirection.y = 0;
                 rb.AddForce(knockbackDirection * hammerKnockbackForce + Vector3.up * jumpForce / 2f, ForceMode.Impulse);
                 animator.SetTrigger("KO_big");
+                GameManager.Instance.DecreaseHP(); // Trừ HP
                 Debug.Log("Hit Hammer Trap, knocked back! | Trigger 'KO_big' set");
             }
         }

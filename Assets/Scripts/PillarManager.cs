@@ -40,6 +40,7 @@ public class PillarManager : MonoBehaviour
 
     void Update()
     {
+        if (GameManager.Instance != null && GameManager.Instance.IsGamePaused()) return;
         if (currentPillar == null) return;
 
         Vector3 pillarTopPosition = currentPillar.transform.position + Vector3.up * pillarHeightOffset;
@@ -52,19 +53,21 @@ public class PillarManager : MonoBehaviour
                 Debug.Log("Success! Player reached initial pillar at " + pillarTopPosition);
                 previousPillar = currentPillar;
                 currentPillar = nextPillar;
-                SpawnPowerUps(currentPillar); // Spawn PowerUp ngay từ nextPillar
+                SpawnPowerUps(currentPillar);
                 Debug.Log("Reached initial pillar, moving to next pillar.");
             }
             else if (hasStartedSpawning)
             {
                 Debug.Log("Success! Player reached pillar at " + pillarTopPosition);
                 TransitionToNewPillar();
+                GameManager.Instance.IncreaseScore(); // Tăng Score khi đi qua cầu
             }
             else if (currentPillar == nextPillar)
             {
                 Debug.Log("Success! Player reached next pillar at " + pillarTopPosition);
                 TransitionToNewPillar();
                 hasStartedSpawning = true;
+                GameManager.Instance.IncreaseScore(); // Tăng Score khi đi qua cầu
             }
         }
     }

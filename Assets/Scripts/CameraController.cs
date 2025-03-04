@@ -38,6 +38,7 @@ public class CameraController : MonoBehaviour
     #endregion
     void LateUpdate()
     {
+        if (GameManager.Instance != null && GameManager.Instance.IsGamePaused()) return;
         if (player == null) return;
 
         // Cập nhật góc Y theo góc xoay của player
