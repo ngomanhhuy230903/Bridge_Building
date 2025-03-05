@@ -23,6 +23,13 @@ public class BridgeManager : MonoBehaviour
     private readonly Vector3 maxScale = new Vector3(0.3f, 0.3f, 0.3f);
     private List<GameObject> activeTraps = new List<GameObject>();
 
+    #region 
+    /// <summary>
+    /// Khởi tạo giá trị ban đầu cho BridgeManager, kiểm tra các tham chiếu cần thiết.
+    /// Người tạo: Huynm, ngày tạo: 2025-02-28
+    /// Ngày sửa: 2025-03-02
+    /// </summary>
+    #endregion
     void Start()
     {
         if (bridgePool == null || playerTransform == null || spikeTrapPool == null || hammerTrapPool == null || spikeTrapPrefab == null || hammerTrapPrefab == null)
@@ -31,6 +38,13 @@ public class BridgeManager : MonoBehaviour
         }
     }
 
+    #region 
+    /// <summary>
+    /// Xử lý logic dựng và thả cầu dựa trên input người chơi.
+    /// Người tạo: Huynm, ngày tạo: 2025-02-28
+    /// Ngày sửa: 2025-03-02
+    /// </summary>
+    #endregion
     void Update()
     {
         if (GameManager.Instance != null && GameManager.Instance.IsGamePaused()) return;
@@ -49,6 +63,13 @@ public class BridgeManager : MonoBehaviour
         }
     }
 
+    #region 
+    /// <summary>
+    /// Bắt đầu dựng cầu phía trước player theo hướng quay, spawn cầu ở vị trí cao hơn 2Y.
+    /// Người tạo: Huynm, ngày tạo: 2025-02-28
+    /// Ngày sửa: 2025-03-02
+    /// </summary>
+    #endregion
     private void StartBuilding()
     {
         Vector3 playerForward = playerTransform.forward;
@@ -68,7 +89,7 @@ public class BridgeManager : MonoBehaviour
         if (rb != null)
         {
             rb.isKinematic = true;
-            rb.velocity = Vector3.zero; // Reset để tránh trạng thái cũ
+            rb.velocity = Vector3.zero;
             rb.angularVelocity = Vector3.zero;
         }
         else
@@ -80,6 +101,13 @@ public class BridgeManager : MonoBehaviour
         Debug.Log("Player Forward: " + playerForward + " | Bridge Spawn Position: " + bridgeStartPosition + " | Bridge Rotation: " + currentBridge.transform.eulerAngles);
     }
 
+    #region 
+    /// <summary>
+    /// Tăng hoặc giảm kích thước cầu đồng đều theo hướng Y, dựa trên trạng thái isGrowing.
+    /// Người tạo: Huynm, ngày tạo: 2025-02-28
+    /// Ngày sửa: 2025-03-02
+    /// </summary>
+    #endregion
     private void GrowBridge()
     {
         if (isGrowing)
@@ -106,6 +134,13 @@ public class BridgeManager : MonoBehaviour
         currentBridge.transform.position = bridgeStartPosition + Vector3.up * (bridgeScale / 2f);
     }
 
+    #region 
+    /// <summary>
+    /// Thả cầu để rơi xuống và lên lịch spawn chướng ngại vật sau 1 giây.
+    /// Người tạo: Huynm, ngày tạo: 2025-02-28
+    /// Ngày sửa: 2025-03-02
+    /// </summary>
+    #endregion
     private void DropBridge()
     {
         isBuilding = false;
@@ -113,7 +148,7 @@ public class BridgeManager : MonoBehaviour
         if (rb != null)
         {
             rb.isKinematic = false;
-            rb.velocity = Vector3.zero; // Reset trước khi thả
+            rb.velocity = Vector3.zero;
             rb.angularVelocity = Vector3.zero;
             Debug.Log("DropBridge | Rigidbody Kinematic: " + rb.isKinematic + " | Velocity: " + rb.velocity);
         }
@@ -122,6 +157,13 @@ public class BridgeManager : MonoBehaviour
         Invoke("SpawnObstacles", 1f);
     }
 
+    #region 
+    /// <summary>
+    /// Spawn chướng ngại vật ngẫu nhiên trong BoxCollider của cầu, chỉ ngẫu nhiên trên trục X.
+    /// Người tạo: Huynm, ngày tạo: 2025-02-28
+    /// Ngày sửa: 2025-03-02
+    /// </summary>
+    #endregion
     private void SpawnObstacles()
     {
         if (currentBridge == null) return;
@@ -160,6 +202,13 @@ public class BridgeManager : MonoBehaviour
         }
     }
 
+    #region 
+    /// <summary>
+    /// Vô hiệu hóa cầu hiện tại và tất cả các trap liên quan để đưa về Pool.
+    /// Người tạo: Huynm, ngày tạo: 2025-02-28
+    /// Ngày sửa: 2025-03-02
+    /// </summary>
+    #endregion
     public void DeactivateCurrentBridge()
     {
         if (currentBridge != null)
@@ -181,27 +230,46 @@ public class BridgeManager : MonoBehaviour
     }
 }
 
-// Script riêng để điều khiển búa di chuyển trái-phải
 public class HammerMovement : MonoBehaviour
 {
-    private float moveSpeed; // Tốc độ di chuyển của búa
-    private float range; // Phạm vi di chuyển (dựa trên chiều rộng cầu)
+    private float moveSpeed;
+    private float range;
     private Vector3 startPosition;
 
+    #region 
+    /// <summary>
+    /// Khởi tạo vị trí ban đầu của búa khi được tạo.
+    /// Người tạo: Huynm, ngày tạo: 2025-02-28
+    /// Ngày sửa: 2025-03-02
+    /// </summary>
+    #endregion
     void Start()
     {
         startPosition = transform.position;
     }
 
+    #region 
+    /// <summary>
+    /// Thiết lập thông số di chuyển cho búa dựa trên chiều rộng cầu và tốc độ.
+    /// Người tạo: Huynm, ngày tạo: 2025-02-28
+    /// Ngày sửa: 2025-03-02
+    /// </summary>
+    #endregion
     public void SetMovementParameters(float bridgeWidth, float speed)
     {
-        range = bridgeWidth * 0.008f; // Giảm phạm vi xuống 40% chiều rộng cầu
-        moveSpeed = 3f * speed; // Tốc độ điều chỉnh
+        range = bridgeWidth * 0.008f;
+        moveSpeed = 3f * speed;
     }
 
+    #region 
+    /// <summary>
+    /// Cập nhật vị trí búa để di chuyển trái-phải theo sóng sin.
+    /// Người tạo: Huynm, ngày tạo: 2025-02-28
+    /// Ngày sửa: 2025-03-02
+    /// </summary>
+    #endregion
     void Update()
     {
-        // Di chuyển trái-phải theo sóng sin
         float offset = Mathf.Sin(Time.time * moveSpeed) * range;
         transform.position = startPosition + new Vector3(offset, 0f, 0f);
     }

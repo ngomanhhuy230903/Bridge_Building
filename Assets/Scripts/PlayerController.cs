@@ -20,6 +20,13 @@ public class PlayerController : MonoBehaviour
     private bool isInvincible = false;
     private float powerUpEndTime;
 
+    #region 
+    /// <summary>
+    /// Khởi tạo giá trị ban đầu cho PlayerController, thiết lập Rigidbody và Animator.
+    /// Người tạo: Huynm, ngày tạo: 2025-02-28
+    /// Ngày sửa: 2025-03-02
+    /// </summary>
+    #endregion
     void Start()
     {
         rb = GetComponent<Rigidbody>();
@@ -33,6 +40,13 @@ public class PlayerController : MonoBehaviour
         Debug.Log("PlayerController Start | Rigidbody Kinematic: " + rb.isKinematic + " | Velocity: " + rb.velocity);
     }
 
+    #region 
+    /// <summary>
+    /// Xử lý input người chơi để di chuyển, xoay và nhảy trong mỗi frame.
+    /// Người tạo: Huynm, ngày tạo: 2025-02-28
+    /// Ngày sửa: 2025-03-02
+    /// </summary>
+    #endregion
     void Update()
     {
         if (GameManager.Instance != null && GameManager.Instance.IsGamePaused()) return;
@@ -68,6 +82,13 @@ public class PlayerController : MonoBehaviour
         UpdateAnimation();
     }
 
+    #region 
+    /// <summary>
+    /// Di chuyển nhân vật theo hướng forward dựa trên input người chơi.
+    /// Người tạo: Huynm, ngày tạo: 2025-02-28
+    /// Ngày sửa: 2025-03-02
+    /// </summary>
+    #endregion
     private void MoveCharacter(float input)
     {
         Vector3 moveDirection = transform.forward * input * moveSpeed * Time.deltaTime;
@@ -75,6 +96,13 @@ public class PlayerController : MonoBehaviour
         Debug.Log("MoveCharacter | Direction: " + moveDirection + " | New Position: " + rb.position);
     }
 
+    #region 
+    /// <summary>
+    /// Xoay nhân vật quanh trục Y dựa trên input người chơi.
+    /// Người tạo: Huynm, ngày tạo: 2025-02-28
+    /// Ngày sửa: 2025-03-02
+    /// </summary>
+    #endregion
     private void TurnCharacter(float input)
     {
         float rotation = input * turnSpeed * Time.deltaTime;
@@ -82,6 +110,13 @@ public class PlayerController : MonoBehaviour
         rb.MoveRotation(rb.rotation * turnRotation);
     }
 
+    #region 
+    /// <summary>
+    /// Thực hiện nhảy cho nhân vật bằng cách thêm lực lên trên.
+    /// Người tạo: Huynm, ngày tạo: 2025-02-28
+    /// Ngày sửa: 2025-03-02
+    /// </summary>
+    #endregion
     private void Jump()
     {
         rb.AddForce(Vector3.up * jumpForce, ForceMode.Impulse);
@@ -91,6 +126,13 @@ public class PlayerController : MonoBehaviour
         Debug.Log("Player jumped at: " + transform.position + " | Trigger 'Jump' set");
     }
 
+    #region 
+    /// <summary>
+    /// Cập nhật trạng thái animation của nhân vật (Walk, Run, Jump).
+    /// Người tạo: Huynm, ngày tạo: 2025-02-28
+    /// Ngày sửa: 2025-03-02
+    /// </summary>
+    #endregion
     private void UpdateAnimation()
     {
         bool isRunning = moveSpeed >= 3f && isMoving;
@@ -104,6 +146,13 @@ public class PlayerController : MonoBehaviour
         }
     }
 
+    #region 
+    /// <summary>
+    /// Xử lý va chạm với trap và PowerUp, cập nhật trạng thái nhân vật.
+    /// Người tạo: Huynm, ngày tạo: 2025-02-28
+    /// Ngày sửa: 2025-03-02
+    /// </summary>
+    #endregion
     void OnCollisionEnter(Collision collision)
     {
         Debug.Log("Collided with: " + collision.gameObject.name + " | Layer: " + LayerMask.LayerToName(collision.gameObject.layer));
@@ -115,7 +164,7 @@ public class PlayerController : MonoBehaviour
                 moveSpeed = originalMoveSpeed * spikeSlowFactor;
                 Invoke("ResetSpeed", 2f);
                 animator.SetTrigger("Damage");
-                GameManager.Instance.DecreaseHP(); // Trừ HP
+                GameManager.Instance.DecreaseHP();
                 Debug.Log("Hit Spike Trap, speed reduced to: " + moveSpeed + " | Trigger 'Damage' set");
             }
             else if (collision.gameObject.CompareTag("HammerTrap"))
@@ -124,7 +173,7 @@ public class PlayerController : MonoBehaviour
                 knockbackDirection.y = 0;
                 rb.AddForce(knockbackDirection * hammerKnockbackForce + Vector3.up * jumpForce / 2f, ForceMode.Impulse);
                 animator.SetTrigger("KO_big");
-                GameManager.Instance.DecreaseHP(); // Trừ HP
+                GameManager.Instance.DecreaseHP();
                 Debug.Log("Hit Hammer Trap, knocked back! | Trigger 'KO_big' set");
             }
         }
@@ -143,18 +192,39 @@ public class PlayerController : MonoBehaviour
         }
     }
 
+    #region 
+    /// <summary>
+    /// Kích hoạt hiệu ứng tăng tốc khi nhặt SpeedPowerUp.
+    /// Người tạo: Huynm, ngày tạo: 2025-02-28
+    /// Ngày sửa: 2025-03-02
+    /// </summary>
+    #endregion
     private void ActivateSpeedBoost()
     {
         moveSpeed = originalMoveSpeed * speedBoostFactor;
         powerUpEndTime = Time.time + powerUpDuration;
     }
 
+    #region 
+    /// <summary>
+    /// Kích hoạt trạng thái bất tử khi nhặt InvincibilityPowerUp.
+    /// Người tạo: Huynm, ngày tạo: 2025-02-28
+    /// Ngày sửa: 2025-03-02
+    /// </summary>
+    #endregion
     private void ActivateInvincibility()
     {
         isInvincible = true;
         powerUpEndTime = Time.time + powerUpDuration;
     }
 
+    #region 
+    /// <summary>
+    /// Reset trạng thái nhân vật khi PowerUp hết hiệu lực.
+    /// Người tạo: Huynm, ngày tạo: 2025-02-28
+    /// Ngày sửa: 2025-03-02
+    /// </summary>
+    #endregion
     private void ResetPowerUpEffects()
     {
         moveSpeed = originalMoveSpeed;
@@ -162,6 +232,13 @@ public class PlayerController : MonoBehaviour
         Debug.Log("PowerUp effects ended");
     }
 
+    #region 
+    /// <summary>
+    /// Reset tốc độ di chuyển về giá trị ban đầu khi hết hiệu ứng giảm tốc.
+    /// Người tạo: Huynm, ngày tạo: 2025-02-28
+    /// Ngày sửa: 2025-03-02
+    /// </summary>
+    #endregion
     private void ResetSpeed()
     {
         if (Time.time >= powerUpEndTime)

@@ -11,11 +11,21 @@ public class GameManager : MonoBehaviour
     [SerializeField] private BridgeManager bridgeManager;
     [SerializeField] private PillarManager pillarManager;
     [SerializeField] private CameraController cameraController;
+    public int pillarsForDoubleScore = 5;
+    public int pillarsForTripleScore = 10;
 
     private bool isGamePaused = false;
-    private int hp = 3; // HP ban đầu là 3
-    private int score = 0; // Điểm số ban đầu là 0
+    private int hp = 3;
+    private int score = 0;
+    private int consecutivePillars = 0;
 
+    #region 
+    /// <summary>
+    /// Thiết lập Singleton cho GameManager và đăng ký sự kiện load scene.
+    /// Người tạo: Huynm, ngày tạo: 2025-02-28
+    /// Ngày sửa: 2025-03-02
+    /// </summary>
+    #endregion
     void Awake()
     {
         if (Instance == null)
@@ -30,6 +40,13 @@ public class GameManager : MonoBehaviour
         SceneManager.sceneLoaded += OnSceneLoaded;
     }
 
+    #region 
+    /// <summary>
+    /// Khởi tạo giá trị ban đầu cho GameManager, bao gồm HP, Score và Consecutive Pillars.
+    /// Người tạo: Huynm, ngày tạo: 2025-02-28
+    /// Ngày sửa: 2025-03-02
+    /// </summary>
+    #endregion
     void Start()
     {
         if (player == null || replayScreen == null || bridgeManager == null || pillarManager == null || cameraController == null)
@@ -39,11 +56,19 @@ public class GameManager : MonoBehaviour
         }
         replayScreen.SetActive(false);
         isGamePaused = false;
-        hp = 3; // Reset HP khi khởi động
-        score = 0; // Reset Score khi khởi động
-        Debug.Log("GameManager initialized in scene: " + SceneManager.GetActiveScene().name + " | HP: " + hp + " | Score: " + score);
+        hp = 3;
+        score = 0;
+        consecutivePillars = 0;
+        Debug.Log("GameManager initialized in scene: " + SceneManager.GetActiveScene().name + " | HP: " + hp + " | Score: " + score + " | Consecutive Pillars: " + consecutivePillars);
     }
 
+    #region 
+    /// <summary>
+    /// Kiểm tra điều kiện Game Over (HP <= 0 hoặc rơi quá ngưỡng Y).
+    /// Người tạo: Huynm, ngày tạo: 2025-02-28
+    /// Ngày sửa: 2025-03-02
+    /// </summary>
+    #endregion
     void Update()
     {
         if (isGamePaused) return;
@@ -54,6 +79,13 @@ public class GameManager : MonoBehaviour
         }
     }
 
+    #region 
+    /// <summary>
+    /// Kích hoạt trạng thái Game Over, tạm dừng game và hiển thị màn hình Replay.
+    /// Người tạo: Huynm, ngày tạo: 2025-02-28
+    /// Ngày sửa: 2025-03-02
+    /// </summary>
+    #endregion
     private void TriggerGameOver()
     {
         isGamePaused = true;
@@ -62,6 +94,13 @@ public class GameManager : MonoBehaviour
         Debug.Log("Game Over! HP: " + hp + " | Player Y: " + player.position.y + " | Showing Replay screen.");
     }
 
+    #region 
+    /// <summary>
+    /// Load lại scene hiện tại khi người chơi chọn Replay.
+    /// Người tạo: Huynm, ngày tạo: 2025-02-28
+    /// Ngày sửa: 2025-03-02
+    /// </summary>
+    #endregion
     public void Replay()
     {
         isGamePaused = false;
@@ -70,39 +109,116 @@ public class GameManager : MonoBehaviour
         Debug.Log("Replay triggered, reloading scene: " + SceneManager.GetActiveScene().name);
     }
 
+    #region 
+    /// <summary>
+    /// Reset trạng thái game sau khi scene được load lại.
+    /// Người tạo: Huynm, ngày tạo: 2025-02-28
+    /// Ngày sửa: 2025-03-02
+    /// </summary>
+    #endregion
     private void OnSceneLoaded(Scene scene, LoadSceneMode mode)
     {
         Time.timeScale = 1f;
         isGamePaused = false;
         replayScreen.SetActive(false);
-        hp = 3; // Reset HP sau khi load scene
-        score = 0; // Reset Score sau khi load scene
-        Debug.Log("Scene loaded: " + scene.name + " | Time.timeScale reset to: " + Time.timeScale + " | HP: " + hp + " | Score: " + score);
+        hp = 3;
+        score = 0;
+        consecutivePillars = 0;
+        Debug.Log("Scene loaded: " + scene.name + " | Time.timeScale reset to: " + Time.timeScale + " | HP: " + hp + " | Score: " + score + " | Consecutive Pillars: " + consecutivePillars);
     }
 
+    #region 
+    /// <summary>
+    /// Trả về trạng thái tạm dừng của game.
+    /// Người tạo: Huynm, ngày tạo: 2025-02-28
+    /// Ngày sửa: 2025-03-02
+    /// </summary>
+    #endregion
     public bool IsGamePaused()
     {
         return isGamePaused;
     }
 
-    // Hàm để giảm HP
+    #region 
+    /// <summary>
+    /// Giảm HP của người chơi khi va chạm trap và reset số trụ liên tiếp.
+    /// Người tạo: Huynm, ngày tạo: 2025-02-28
+    /// Ngày sửa: 2025-03-02
+    /// </summary>
+    #endregion
     public void DecreaseHP()
     {
         hp--;
-        Debug.Log("HP decreased! Current HP: " + hp);
+        consecutivePillars = 0;
+        Debug.Log("HP decreased! Current HP: " + hp + " | Consecutive Pillars reset to: " + consecutivePillars);
     }
 
-    // Hàm để tăng Score
+    #region 
+    /// <summary>
+    /// Tăng điểm số dựa trên số trụ liên tiếp và multiplier tương ứng.
+    /// Người tạo: Huynm, ngày tạo: 2025-02-28
+    /// Ngày sửa: 2025-03-02
+    /// </summary>
+    #endregion
     public void IncreaseScore()
     {
-        score++;
-        Debug.Log("Score increased! Current Score: " + score);
+        consecutivePillars++;
+        int multiplier = GetScoreMultiplier();
+        int points = 1 * multiplier;
+        score += points;
+        Debug.Log("Score increased! Consecutive Pillars: " + consecutivePillars + " | Multiplier: x" + multiplier + " | Points gained: " + points + " | Current Score: " + score);
     }
 
-    // Hàm lấy HP và Score để hiển thị
+    #region 
+    /// <summary>
+    /// Tính toán multiplier điểm dựa trên số trụ liên tiếp.
+    /// Người tạo: Huynm, ngày tạo: 2025-02-28
+    /// Ngày sửa: 2025-03-02
+    /// </summary>
+    #endregion
+    private int GetScoreMultiplier()
+    {
+        if (consecutivePillars >= pillarsForTripleScore)
+            return 3;
+        if (consecutivePillars >= pillarsForDoubleScore)
+            return 2;
+        return 1;
+    }
+
+    #region 
+    /// <summary>
+    /// Trả về giá trị HP hiện tại của người chơi.
+    /// Người tạo: Huynm, ngày tạo: 2025-02-28
+    /// Ngày sửa: 2025-03-02
+    /// </summary>
+    #endregion
     public int GetHP() { return hp; }
+
+    #region 
+    /// <summary>
+    /// Trả về điểm số hiện tại của người chơi.
+    /// Người tạo: Huynm, ngày tạo: 2025-02-28
+    /// Ngày sửa: 2025-03-02
+    /// </summary>
+    #endregion
     public int GetScore() { return score; }
 
+    #region 
+    /// <summary>
+    /// Trả về số trụ liên tiếp hiện tại của người chơi.
+    /// Người tạo: Huynm, ngày tạo: 2025-02-28
+    /// Ngày sửa: 2025-03-02
+    /// </summary>
+    #endregion
+    public int GetConsecutivePillars() { return consecutivePillars; }
+
+    #region 
+    /// <summary>
+    /// Hủy đăng ký sự kiện load scene khi GameManager bị hủy.
+    /// Người tạo: Huynm, ngày tạo: 2025-02-28
+    /// Ngày sửa: 2025-03-02
+    /// </summary>
+    #endregion
     void OnDestroy()
     {
         SceneManager.sceneLoaded -= OnSceneLoaded;

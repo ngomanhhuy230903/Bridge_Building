@@ -24,6 +24,13 @@ public class PillarManager : MonoBehaviour
     private bool hasStartedSpawning;
     private List<GameObject> activePowerUps = new List<GameObject>();
 
+    #region 
+    /// <summary>
+    /// Khởi tạo giá trị ban đầu cho PillarManager, thiết lập trụ đầu tiên và kiểm tra tham chiếu.
+    /// Người tạo: Huynm, ngày tạo: 2025-02-28
+    /// Ngày sửa: 2025-03-02
+    /// </summary>
+    #endregion
     void Start()
     {
         if (player == null || pillarPool == null || initialPillar == null || nextPillar == null || bridgeManager == null || powerUpPool == null || speedPowerUpPrefab == null || invincibilityPowerUpPrefab == null)
@@ -38,6 +45,13 @@ public class PillarManager : MonoBehaviour
         Debug.Log("PillarManager initialized | PowerUp Pool: " + (powerUpPool != null));
     }
 
+    #region 
+    /// <summary>
+    /// Kiểm tra vị trí người chơi để chuyển sang trụ tiếp theo và spawn PowerUp.
+    /// Người tạo: Huynm, ngày tạo: 2025-02-28
+    /// Ngày sửa: 2025-03-02
+    /// </summary>
+    #endregion
     void Update()
     {
         if (GameManager.Instance != null && GameManager.Instance.IsGamePaused()) return;
@@ -60,18 +74,25 @@ public class PillarManager : MonoBehaviour
             {
                 Debug.Log("Success! Player reached pillar at " + pillarTopPosition);
                 TransitionToNewPillar();
-                GameManager.Instance.IncreaseScore(); // Tăng Score khi đi qua cầu
+                GameManager.Instance.IncreaseScore();
             }
             else if (currentPillar == nextPillar)
             {
                 Debug.Log("Success! Player reached next pillar at " + pillarTopPosition);
                 TransitionToNewPillar();
                 hasStartedSpawning = true;
-                GameManager.Instance.IncreaseScore(); // Tăng Score khi đi qua cầu
+                GameManager.Instance.IncreaseScore();
             }
         }
     }
 
+    #region 
+    /// <summary>
+    /// Chuyển sang trụ mới, vô hiệu hóa trụ cũ và spawn PowerUp trên trụ mới.
+    /// Người tạo: Huynm, ngày tạo: 2025-02-28
+    /// Ngày sửa: 2025-03-02
+    /// </summary>
+    #endregion
     private void TransitionToNewPillar()
     {
         if (previousPillar != null)
@@ -88,6 +109,13 @@ public class PillarManager : MonoBehaviour
         Debug.Log("Spawned new random pillar at " + lastPillarPosition);
     }
 
+    #region 
+    /// <summary>
+    /// Tính toán và spawn vị trí ngẫu nhiên cho trụ tiếp theo.
+    /// Người tạo: Huynm, ngày tạo: 2025-02-28
+    /// Ngày sửa: 2025-03-02
+    /// </summary>
+    #endregion
     private void SpawnNextPillar()
     {
         float randomDistance = Random.Range(minDistance, maxDistance);
@@ -101,6 +129,13 @@ public class PillarManager : MonoBehaviour
         lastPillarPosition = newPosition;
     }
 
+    #region 
+    /// <summary>
+    /// Spawn PowerUp ngẫu nhiên trên đỉnh trụ mới.
+    /// Người tạo: Huynm, ngày tạo: 2025-02-28
+    /// Ngày sửa: 2025-03-02
+    /// </summary>
+    #endregion
     private void SpawnPowerUps(GameObject pillar)
     {
         Vector3 pillarTop = pillar.transform.position + Vector3.up * pillarHeightOffset;
@@ -128,6 +163,13 @@ public class PillarManager : MonoBehaviour
         }
     }
 
+    #region 
+    /// <summary>
+    /// Vô hiệu hóa tất cả PowerUp đang active trên trụ.
+    /// Người tạo: Huynm, ngày tạo: 2025-02-28
+    /// Ngày sửa: 2025-03-02
+    /// </summary>
+    #endregion
     public void DeactivatePowerUps()
     {
         foreach (GameObject powerUp in activePowerUps)
@@ -141,6 +183,13 @@ public class PillarManager : MonoBehaviour
         activePowerUps.Clear();
     }
 
+    #region 
+    /// <summary>
+    /// Lấy trụ tiếp theo từ Pool hoặc trả về null nếu không có.
+    /// Người tạo: Huynm, ngày tạo: 2025-02-28
+    /// Ngày sửa: 2025-03-02
+    /// </summary>
+    #endregion
     public GameObject GetNextPillar()
     {
         if (currentPillar == initialPillar)
