@@ -41,24 +41,13 @@ public class CameraController : MonoBehaviour
         if (GameManager.Instance != null && GameManager.Instance.IsGamePaused()) return;
         if (player == null) return;
 
-        // Cập nhật góc Y theo góc xoay của player
         currentAngleY = player.eulerAngles.y;
 
-        // Xử lý xoay camera bằng chuột (tùy chọn, không bắt buộc)
-        if (Input.GetMouseButton(1)) // Nhấn chuột phải để xoay thủ công
-        {
-            currentAngleY += Input.GetAxis("Mouse X") * rotationSpeed;
-        }
-
-        // Tính toán vị trí mục tiêu của camera
         Quaternion rotation = Quaternion.Euler(0f, currentAngleY, 0f);
-        Vector3 offset = new Vector3(0f, height, -distance); // Offset dựa trên chiều cao và khoảng cách
+        Vector3 offset = new Vector3(0f, height, -distance);
         Vector3 targetPosition = player.position + (rotation * offset);
 
-        // Di chuyển camera mượt mà đến vị trí mục tiêu
         transform.position = Vector3.Lerp(transform.position, targetPosition, smoothSpeed * Time.deltaTime);
-
-        // Đặt góc nghiêng cố định và xoay camera hướng về nhân vật
         transform.rotation = Quaternion.Euler(tiltAngle, currentAngleY, 0f);
     }
 }

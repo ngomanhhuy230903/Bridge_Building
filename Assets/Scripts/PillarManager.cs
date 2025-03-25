@@ -7,6 +7,7 @@ public class PillarManager : MonoBehaviour
     [SerializeField] private Transform player;
     [SerializeField] private GameObject initialPillar;
     [SerializeField] private GameObject nextPillar;
+    [SerializeField] private float distance = 0.8f;
     [SerializeField] private float minDistance = 5f;
     [SerializeField] private float maxDistance = 6f;
     [SerializeField] private float minHeight = -2f;
@@ -16,24 +17,26 @@ public class PillarManager : MonoBehaviour
     [SerializeField] private ObjectPool powerUpPool;
     [SerializeField] private GameObject speedPowerUpPrefab;
     [SerializeField] private GameObject invincibilityPowerUpPrefab;
+    [SerializeField] private GameObject healthPowerUpPrefab;
     [SerializeField] private int maxPowerUps = 1;
+    [SerializeField] private float pillarMoveSpeed = 2f; 
+    [SerializeField] private float pillarVerticalSpeed = 1f;
+    [SerializeField] private float pillarMoveDistance = 2.5f; 
+    [SerializeField] private float pillarVerticalDistance = 0.9f; 
 
     private Vector3 lastPillarPosition;
     private GameObject currentPillar;
     private GameObject previousPillar;
     private bool hasStartedSpawning;
     private List<GameObject> activePowerUps = new List<GameObject>();
+    private Vector3 pillarSpawnPosition; // Vị trí spawn ban đầu của trụ hiện tại
+    private bool isPillarMoving = true; // Trụ có đang di chuyển không
 
-    #region 
-    /// <summary>
-    /// Khởi tạo giá trị ban đầu cho PillarManager, thiết lập trụ đầu tiên và kiểm tra tham chiếu.
-    /// Người tạo: Huynm, ngày tạo: 2025-02-28
-    /// Ngày sửa: 2025-03-02
-    /// </summary>
-    #endregion
     void Start()
     {
-        if (player == null || pillarPool == null || initialPillar == null || nextPillar == null || bridgeManager == null || powerUpPool == null || speedPowerUpPrefab == null || invincibilityPowerUpPrefab == null)
+        if (player == null || pillarPool == null || initialPillar == null || nextPillar == null ||
+            bridgeManager == null || powerUpPool == null || speedPowerUpPrefab == null ||
+            invincibilityPowerUpPrefab == null || healthPowerUpPrefab == null)
         {
             Debug.LogError("Missing references in PillarManager!");
             return;
@@ -41,17 +44,11 @@ public class PillarManager : MonoBehaviour
         currentPillar = initialPillar;
         previousPillar = null;
         lastPillarPosition = initialPillar.transform.position;
+        pillarSpawnPosition = lastPillarPosition; // Lưu vị trí spawn ban đầu
         hasStartedSpawning = false;
         Debug.Log("PillarManager initialized | PowerUp Pool: " + (powerUpPool != null));
     }
 
-    #region 
-    /// <summary>
-    /// Kiểm tra vị trí người chơi để chuyển sang trụ tiếp theo và spawn PowerUp.
-    /// Người tạo: Huynm, ngày tạo: 2025-02-28
-    /// Ngày sửa: 2025-03-02
-    /// </summary>
-    #endregion
     void Update()
     {
         if (GameManager.Instance != null && GameManager.Instance.IsGamePaused()) return;
@@ -60,13 +57,14 @@ public class PillarManager : MonoBehaviour
         Vector3 pillarTopPosition = currentPillar.transform.position + Vector3.up * pillarHeightOffset;
         float distanceToPillar = Vector3.Distance(player.position, pillarTopPosition);
 
-        if (distanceToPillar < 1f)
+        if (distanceToPillar < distance)
         {
             if (currentPillar == initialPillar && !hasStartedSpawning)
             {
                 Debug.Log("Success! Player reached initial pillar at " + pillarTopPosition);
                 previousPillar = currentPillar;
                 currentPillar = nextPillar;
+                pillarSpawnPosition = currentPillar.transform.position; // Cập nhật vị trí spawn
                 SpawnPowerUps(currentPillar);
                 Debug.Log("Reached initial pillar, moving to next pillar.");
             }
@@ -84,15 +82,14 @@ public class PillarManager : MonoBehaviour
                 GameManager.Instance.IncreaseScore();
             }
         }
+
+        // Di chuyển trụ nếu đang trong trạng thái di chuyển
+        if (isPillarMoving && currentPillar != null)
+        {
+            MovePillar();
+        }
     }
 
-    #region 
-    /// <summary>
-    /// Chuyển sang trụ mới, vô hiệu hóa trụ cũ và spawn PowerUp trên trụ mới.
-    /// Người tạo: Huynm, ngày tạo: 2025-02-28
-    /// Ngày sửa: 2025-03-02
-    /// </summary>
-    #endregion
     private void TransitionToNewPillar()
     {
         if (previousPillar != null)
@@ -105,37 +102,31 @@ public class PillarManager : MonoBehaviour
         SpawnNextPillar();
         previousPillar = currentPillar;
         currentPillar = pillarPool.GetObject(lastPillarPosition, Quaternion.identity);
+        pillarSpawnPosition = lastPillarPosition; // Lưu vị trí spawn của trụ mới
+        isPillarMoving = true; // Bật lại trạng thái di chuyển
         SpawnPowerUps(currentPillar);
         Debug.Log("Spawned new random pillar at " + lastPillarPosition);
     }
 
-    #region 
-    /// <summary>
-    /// Tính toán và spawn vị trí ngẫu nhiên cho trụ tiếp theo.
-    /// Người tạo: Huynm, ngày tạo: 2025-02-28
-    /// Ngày sửa: 2025-03-02
-    /// </summary>
-    #endregion
     private void SpawnNextPillar()
     {
         float randomDistance = Random.Range(minDistance, maxDistance);
         float randomHeight = Random.Range(minHeight, maxHeight);
-        Vector3 direction = Random.onUnitSphere;
-        direction.y = 0;
-        direction.Normalize();
 
+        // Dùng hướng cố định (ví dụ: trục X) thay vì random hướng
+        Vector3 direction = Vector3.forward; // Hướng cố định +Z, có thể đổi thành Vector3.right (+X) nếu muốn
+
+        // Tính vị trí mới chỉ dựa trên hướng cố định
         Vector3 newPosition = lastPillarPosition + (direction * randomDistance);
         newPosition.y = lastPillarPosition.y + randomHeight;
+
+        // Cập nhật vị trí trụ
         lastPillarPosition = newPosition;
+
+        // Log để kiểm tra
+        Debug.Log("New pillar position: " + newPosition + " | Distance: " + randomDistance);
     }
 
-    #region 
-    /// <summary>
-    /// Spawn PowerUp ngẫu nhiên trên đỉnh trụ mới.
-    /// Người tạo: Huynm, ngày tạo: 2025-02-28
-    /// Ngày sửa: 2025-03-02
-    /// </summary>
-    #endregion
     private void SpawnPowerUps(GameObject pillar)
     {
         Vector3 pillarTop = pillar.transform.position + Vector3.up * pillarHeightOffset;
@@ -145,10 +136,16 @@ public class PillarManager : MonoBehaviour
 
         for (int i = 0; i < powerUpCount; i++)
         {
-            bool isSpeedPowerUp = Random.value > 0.5f;
-            GameObject powerUpPrefab = isSpeedPowerUp ? speedPowerUpPrefab : invincibilityPowerUpPrefab;
+            float randomValue = Random.value;
+            GameObject powerUpPrefab;
+            if (randomValue < 0.33f)
+                powerUpPrefab = healthPowerUpPrefab;
+            else if (randomValue < 0.66f)
+                powerUpPrefab = invincibilityPowerUpPrefab;
+            else
+                powerUpPrefab = speedPowerUpPrefab;
 
-            Vector3 spawnPosition = pillarTop + new Vector3(Random.Range(-0.5f, 0.5f), 0.5f, Random.Range(-0.5f, 0.5f));
+            Vector3 spawnPosition = pillarTop + new Vector3(Random.Range(-0.5f, 0.5f), -1f, Random.Range(-0.5f, 0.5f));
             GameObject powerUp = powerUpPool.GetObject(spawnPosition, Quaternion.identity);
             if (powerUp != null)
             {
@@ -162,14 +159,26 @@ public class PillarManager : MonoBehaviour
             }
         }
     }
+    private void MovePillar()
+    {
+        if (currentPillar == null) return;
 
-    #region 
-    /// <summary>
-    /// Vô hiệu hóa tất cả PowerUp đang active trên trụ.
-    /// Người tạo: Huynm, ngày tạo: 2025-02-28
-    /// Ngày sửa: 2025-03-02
-    /// </summary>
-    #endregion
+        float xOffset = Mathf.Sin(Time.time * pillarMoveSpeed) * pillarMoveDistance;
+        float yOffset = Mathf.Sin(Time.time * pillarVerticalSpeed) * pillarVerticalDistance;
+
+        Vector3 newPosition = pillarSpawnPosition + new Vector3(xOffset, yOffset, 0f);
+        currentPillar.transform.position = newPosition;
+
+        Debug.Log("Pillar moving | Position: " + newPosition);
+    }
+
+    // Gọi từ BridgeManager để dừng trụ khi bắt đầu dựng cầu
+    public void StopPillarMovement()
+    {
+        isPillarMoving = false;
+        Debug.Log("Pillar movement stopped at: " + currentPillar.transform.position);
+    }
+
     public void DeactivatePowerUps()
     {
         foreach (GameObject powerUp in activePowerUps)
@@ -183,13 +192,6 @@ public class PillarManager : MonoBehaviour
         activePowerUps.Clear();
     }
 
-    #region 
-    /// <summary>
-    /// Lấy trụ tiếp theo từ Pool hoặc trả về null nếu không có.
-    /// Người tạo: Huynm, ngày tạo: 2025-02-28
-    /// Ngày sửa: 2025-03-02
-    /// </summary>
-    #endregion
     public GameObject GetNextPillar()
     {
         if (currentPillar == initialPillar)

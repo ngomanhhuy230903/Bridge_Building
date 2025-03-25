@@ -4,21 +4,23 @@
 TagManager:
   serializedVersion: 2
   tags:
-  - SpikeTrap
   - HammerTrap
   - SpeedPowerUp
   - InvincibilityPowerUp
   - Traps
+  - Item
+  - gate
+  - HealthPowerUp
   layers:
   - Default
   - TransparentFX
   - Ignore Raycast
-  - 
+  - Bridge
   - Water
   - UI
   - Player
   - Traps
-  - 
+  - Power
   - 
   - 
   - 

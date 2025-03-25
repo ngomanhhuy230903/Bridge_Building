@@ -153,6 +153,19 @@ public class GameManager : MonoBehaviour
         Debug.Log("HP decreased! Current HP: " + hp + " | Consecutive Pillars reset to: " + consecutivePillars);
     }
 
+    public void IncreaseHP()
+    {
+        if (hp < 3) // Giới hạn HP tối đa (giả sử max HP là 3)
+        {
+            hp++;
+            Debug.Log("HP increased! Current HP: " + hp);
+        }
+        else
+        {
+            Debug.Log("HP is already at maximum: " + hp);
+        }
+    }
+
     #region 
     /// <summary>
     /// Tăng điểm số dựa trên số trụ liên tiếp và multiplier tương ứng.

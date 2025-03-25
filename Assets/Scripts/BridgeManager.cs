@@ -7,12 +7,13 @@ public class BridgeManager : MonoBehaviour
     [SerializeField] private float bridgeGrowthSpeed = 0.1f;
     [SerializeField] private Transform playerTransform;
     [SerializeField] private float spawnHeightOffset = 2f;
-    [SerializeField] private ObjectPool spikeTrapPool;
+    [SerializeField] private ObjectPool gatePool;
     [SerializeField] private ObjectPool hammerTrapPool;
-    [SerializeField] private GameObject spikeTrapPrefab;
+    [SerializeField] private GameObject gatePrefab;
     [SerializeField] private GameObject hammerTrapPrefab;
     [SerializeField] private int maxObstacles = 2;
     [SerializeField] private float spawnForwardOffset = 1f;
+    [SerializeField] private PillarManager pillarManager; // Tham chiếu đến PillarManager
 
     private GameObject currentBridge;
     private float bridgeScale;
@@ -23,28 +24,15 @@ public class BridgeManager : MonoBehaviour
     private readonly Vector3 maxScale = new Vector3(0.3f, 0.3f, 0.3f);
     private List<GameObject> activeTraps = new List<GameObject>();
 
-    #region 
-    /// <summary>
-    /// Khởi tạo giá trị ban đầu cho BridgeManager, kiểm tra các tham chiếu cần thiết.
-    /// Người tạo: Huynm, ngày tạo: 2025-02-28
-    /// Ngày sửa: 2025-03-02
-    /// </summary>
-    #endregion
     void Start()
     {
-        if (bridgePool == null || playerTransform == null || spikeTrapPool == null || hammerTrapPool == null || spikeTrapPrefab == null || hammerTrapPrefab == null)
+        if (bridgePool == null || playerTransform == null || gatePool == null || hammerTrapPool == null ||
+            gatePrefab == null || hammerTrapPrefab == null || pillarManager == null)
         {
             Debug.LogError("Missing references in BridgeManager!");
         }
     }
 
-    #region 
-    /// <summary>
-    /// Xử lý logic dựng và thả cầu dựa trên input người chơi.
-    /// Người tạo: Huynm, ngày tạo: 2025-02-28
-    /// Ngày sửa: 2025-03-02
-    /// </summary>
-    #endregion
     void Update()
     {
         if (GameManager.Instance != null && GameManager.Instance.IsGamePaused()) return;
@@ -63,15 +51,11 @@ public class BridgeManager : MonoBehaviour
         }
     }
 
-    #region 
-    /// <summary>
-    /// Bắt đầu dựng cầu phía trước player theo hướng quay, spawn cầu ở vị trí cao hơn 2Y.
-    /// Người tạo: Huynm, ngày tạo: 2025-02-28
-    /// Ngày sửa: 2025-03-02
-    /// </summary>
-    #endregion
     private void StartBuilding()
     {
+        // Dừng trụ di chuyển khi bắt đầu dựng cầu
+        pillarManager.StopPillarMovement();
+
         Vector3 playerForward = playerTransform.forward;
         playerForward.y = 0;
         playerForward.Normalize();
@@ -101,13 +85,6 @@ public class BridgeManager : MonoBehaviour
         Debug.Log("Player Forward: " + playerForward + " | Bridge Spawn Position: " + bridgeStartPosition + " | Bridge Rotation: " + currentBridge.transform.eulerAngles);
     }
 
-    #region 
-    /// <summary>
-    /// Tăng hoặc giảm kích thước cầu đồng đều theo hướng Y, dựa trên trạng thái isGrowing.
-    /// Người tạo: Huynm, ngày tạo: 2025-02-28
-    /// Ngày sửa: 2025-03-02
-    /// </summary>
-    #endregion
     private void GrowBridge()
     {
         if (isGrowing)
@@ -134,13 +111,6 @@ public class BridgeManager : MonoBehaviour
         currentBridge.transform.position = bridgeStartPosition + Vector3.up * (bridgeScale / 2f);
     }
 
-    #region 
-    /// <summary>
-    /// Thả cầu để rơi xuống và lên lịch spawn chướng ngại vật sau 1 giây.
-    /// Người tạo: Huynm, ngày tạo: 2025-02-28
-    /// Ngày sửa: 2025-03-02
-    /// </summary>
-    #endregion
     private void DropBridge()
     {
         isBuilding = false;
@@ -157,13 +127,6 @@ public class BridgeManager : MonoBehaviour
         Invoke("SpawnObstacles", 1f);
     }
 
-    #region 
-    /// <summary>
-    /// Spawn chướng ngại vật ngẫu nhiên trong BoxCollider của cầu, chỉ ngẫu nhiên trên trục X.
-    /// Người tạo: Huynm, ngày tạo: 2025-02-28
-    /// Ngày sửa: 2025-03-02
-    /// </summary>
-    #endregion
     private void SpawnObstacles()
     {
         if (currentBridge == null) return;
@@ -178,22 +141,22 @@ public class BridgeManager : MonoBehaviour
         int obstacleCount = Random.Range(1, maxObstacles + 1);
         for (int i = 0; i < obstacleCount; i++)
         {
-            bool isSpikeTrap = Random.value > 0.5f;
-            GameObject obstaclePrefab = isSpikeTrap ? spikeTrapPrefab : hammerTrapPrefab;
+            bool isgate = Random.value > 0.5f;
+            GameObject obstaclePrefab = isgate ? gatePrefab : hammerTrapPrefab;
 
             Vector3 localPos = new Vector3(
                 Random.Range(-0.5f, 0.5f) * bridgeCollider.size.x,
-                isSpikeTrap ? 0.2f : 5f,
+                isgate ? 0.2f : 3f,
                 0f
             );
             Vector3 spawnPosition = bridgeCollider.transform.TransformPoint(bridgeCollider.center + localPos);
 
-            GameObject obstacle = isSpikeTrap ? spikeTrapPool.GetObject(spawnPosition, Quaternion.identity) : hammerTrapPool.GetObject(spawnPosition, Quaternion.identity);
+            GameObject obstacle = isgate ? gatePool.GetObject(spawnPosition, Quaternion.identity) : hammerTrapPool.GetObject(spawnPosition, Quaternion.identity);
             obstacle.transform.parent = currentBridge.transform;
             activeTraps.Add(obstacle);
             Debug.Log("Spawned obstacle " + obstacle.name + " at: " + spawnPosition);
 
-            if (!isSpikeTrap)
+            if (!isgate)
             {
                 HammerMovement hammerScript = obstacle.GetComponent<HammerMovement>();
                 if (hammerScript == null) hammerScript = obstacle.AddComponent<HammerMovement>();
@@ -202,13 +165,6 @@ public class BridgeManager : MonoBehaviour
         }
     }
 
-    #region 
-    /// <summary>
-    /// Vô hiệu hóa cầu hiện tại và tất cả các trap liên quan để đưa về Pool.
-    /// Người tạo: Huynm, ngày tạo: 2025-02-28
-    /// Ngày sửa: 2025-03-02
-    /// </summary>
-    #endregion
     public void DeactivateCurrentBridge()
     {
         if (currentBridge != null)
